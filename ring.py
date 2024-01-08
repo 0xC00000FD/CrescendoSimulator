@@ -69,7 +69,7 @@ class Ring:
         
         (h, g) = self.calculateHG(A, E, C, f)
         if 0 <= h and h <= 1 and 0 <= g and g <= 1:
-            self.closestDistance = min(self.closestDistance, ((C + F) / 2 - self.position).rho)
+            self.closestDistance = min(self.closestDistance, self.calculateClosestDistanceNormalized(A, E, C, F, g))
             if (C - self.position).rho < (F - self.position).rho:
                 return -1
             else:
@@ -85,6 +85,12 @@ class Ring:
         g = ((C - A).dot(Q)) / (E.dot(Q))
         
         return (h, g)
+    
+    def calculateClosestDistanceNormalized(self, A : vector.VectorObject2D, E : vector.VectorObject2D, C : vector.VectorObject2D, F : vector.VectorObject2D, g):
+        middlePoint : vector.VectorObject2D = (C + F) / 2
+        collisionPoint : vector.VectorObject2D = A + E * g
+        
+        return (middlePoint - collisionPoint).rho
         
     def addForce(self, forceVector):
         self.acceleration += forceVector
@@ -99,7 +105,7 @@ class Ring:
         return time() - self.startTime;
     
     def getArea(self):
-        return 4 * pi * pi * (self.innerDiameterMeters / 2) * (self.outerDiameterMeters / 2)
+        return 2 * pi * pi * (self.innerDiameterMeters / 2) * (self.outerDiameterMeters / 2)
     
     def getClosestDistance(self):
         return self.closestDistance

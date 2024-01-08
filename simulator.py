@@ -27,7 +27,7 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
     wheelRadius = 0.0508 # meters
     theoreticalMaxSpeed = theoreticalMaxRps * 2 * pi * wheelRadius # m / s
 
-    dragCoefficient = 0.12
+    dragCoefficient = 0.2
     mass = 0.253 #kg
     shooterHeightMeters = 1
     innerDiameterMeters = 0.254
@@ -41,8 +41,8 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
     
     f = open(str.format("solutionFile{}.txt", threadID), "w")
         
-    for distance in arange(minDistance, 4, 0.01):
-        for angle in arange(angleStart, angleEnd, - 2 / minDistance):
+    for distance in arange(minDistance, 7, 0.1):
+        for angle in arange(angleStart, angleEnd, - 2 / distance):
             st = 1
             dr = theoreticalMaxSpeed
             
