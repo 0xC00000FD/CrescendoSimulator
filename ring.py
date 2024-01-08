@@ -5,7 +5,7 @@ from time import time
 AIR_DENSITY = 1.293 # kg / (m^(-3))
 
 class Ring:
-    def __init__(self, dragCoefficient, mass, shooterHeightMeters, innerDiameterMeters, outerDiameterMeters, thicknessMeters):
+    def __init__(self, dragCoefficient, mass, shooterHeightMeters, innerDiameterMeters, outerDiameterMeters, thicknessMeters, threadId):
         self.dragCoefficient = dragCoefficient
         self.mass = mass
         self.innerDiameterMeters = innerDiameterMeters
@@ -18,7 +18,8 @@ class Ring:
         self.position = vector.obj(x = 0, y = shooterHeightMeters)
         self.angle = 0
         self.lastTime = 0
-        self.closestDistance = 0
+        self.closestDistance = 1000000
+        self.threadId = threadId
         
     #Provide angle in Radians and ringSpeed in m/s
     def shoot(self, angle, ringSpeed, deltaX):
@@ -28,7 +29,7 @@ class Ring:
         self.startTime = time()
         self.lastTime = time()
         self.deltaX = deltaX
-        self.closestDistance = 0
+        self.closestDistance = 1000000
     
     def update(self):
         currTime = time()
@@ -64,13 +65,17 @@ class Ring:
         
         C = vector.obj(x = self.deltaX, y = 1.9812)
         F = vector.obj(x = self.deltaX - 0.4572, y = 2.0828)
+        f = F - C
         
-        self.closestDistance = min(self.closestDistance, ((C - self.position) + (F - self.position)).rho / 2)
-        
-        if (C - self.position).rho < (F - self.position).rho:
-            return -1
+        (h, g) = self.calculateHG(A, E, C, f)
+        if 0 <= h and h <= 1 and 0 <= g and g <= 1:
+            self.closestDistance = min(self.closestDistance, ((C + F) / 2 - self.position).rho)
+            if (C - self.position).rho < (F - self.position).rho:
+                return -1
+            else:
+                return -2
         else:
-            return -2
+            return 0
         
     def calculateHG(self, A : vector.VectorObject2D, E : vector.VectorObject2D, C : vector.VectorObject2D, F : vector.VectorObject2D):
         P = vector.obj(rho = E.rho, phi = E.phi + pi / 2)
@@ -98,3 +103,6 @@ class Ring:
     
     def getClosestDistance(self):
         return self.closestDistance
+    
+    def getThreadId(self):
+        return self.threadId;
