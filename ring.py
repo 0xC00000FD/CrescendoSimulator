@@ -33,13 +33,13 @@ class Ring:
     
     def update(self):
         currTime = time()
-        deltaTime = currTime - self.lastTime;
-        
-        self.position += self.velocity * deltaTime
+        deltaTime = currTime - self.lastTime
         
         drag = - 1 / 2 * self.dragCoefficient * AIR_DENSITY * self.getArea() * self.velocity * self.velocity.rho 
         
         self.velocity += (self.acceleration + drag) / self.mass * deltaTime
+
+        self.position += self.velocity * deltaTime
                                 
         self.lastTime = currTime
         
@@ -102,7 +102,7 @@ class Ring:
         return self.shooterHeightMeters
     
     def getCurrTime(self):
-        return time() - self.startTime;
+        return time() - self.startTime
     
     def getArea(self):
         return 2 * pi * pi * (self.innerDiameterMeters / 2) * (self.outerDiameterMeters / 2)
@@ -111,4 +111,4 @@ class Ring:
         return self.closestDistance
     
     def getThreadId(self):
-        return self.threadId;
+        return self.threadId
