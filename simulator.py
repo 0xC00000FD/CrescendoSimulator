@@ -3,7 +3,7 @@ from math import radians, pi
 from numpy import arange
 import vector
 import matplotlib.pyplot as plt
-import multiprocessing.pool as pool
+from multiprocessing import Pool, set_start_method
 
 def closest(lst, K):
     return lst[min(range(len(lst)), key = lambda i: abs(lst[i]-K))]
@@ -29,14 +29,15 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
 
     dragCoefficient = 0.2
     mass = 0.253 #kg
-    shooterHeightMeters = 1
+    shooterHeightMeters = 0.22363
+    shooterLengthMeters = 0.5837
     innerDiameterMeters = 0.254
     outerDiameterMeters = 0.3556
     thicknessMeters = 0.0508
 
     checkCollisions = 0
     
-    ring1 = Ring(dragCoefficient, mass, shooterHeightMeters, innerDiameterMeters, outerDiameterMeters, thicknessMeters, threadID)
+    ring1 = Ring(dragCoefficient, mass, shooterHeightMeters, shooterLengthMeters, innerDiameterMeters, outerDiameterMeters, thicknessMeters, threadID)
     ring1.addForce(vector.obj(x = 0.0, y = -9.81 * mass)) #gravitational force
     
     f = open(str.format("solutionFile{}.txt", threadID), "w")
@@ -51,14 +52,15 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
                 
                 ring1.shoot(radians(angle), speed, distance)
                 
-                while ring1.getPosition().y >= 0:                    
+                ring1.resetTimer()
+                while ring1.getPosition().y >= 0:      
+                    ring1.update(0.0001)
+                                  
                     checkCollisions = ring1.checkCollisions()
                     if checkCollisions != 0:
                         break
-                    
-                    ring1.update()
                 
-                print(ring1.getPosition(), flush=True)
+                print(ring1.getPosition(), angle, distance, speed, checkCollisions, flush=True)
                 if checkCollisions == 1 or ring1.getPosition().y < 0:
                     st = speed + 0.5
                 elif checkCollisions == 2:
@@ -72,17 +74,20 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
                         st = speed + 0.5
                     elif checkCollisions == -2:
                         dr = speed - 0.05
-                
-                    print(ring1.getPosition(), checkCollisions, flush=True)
-
-angles = []
-numOfThreads = 10
-for thread in range(numOfThreads):
-    startAngle = 75 / numOfThreads * thread
-    endAngle = 75 / (numOfThreads + 1) * thread
+                        
+if __name__ == '__main__':
+    angles = []
+    numOfThreads = 15
     
-    angles.append((startAngle, endAngle, thread))
+    minAngle = 20
+    maxAngle = 65
+    
+    for thread in range(numOfThreads):
+        startAngle = (maxAngle - minAngle) / numOfThreads * thread + minAngle
+        endAngle = (maxAngle - minAngle) / (numOfThreads + 1) * thread + minAngle
+        
+        angles.append((startAngle, endAngle, thread))
 
-threadPool = pool.ThreadPool(numOfThreads)
-result = threadPool.starmap_async(runSimulatorFunction, angles)
-result.get()
+    threadPool = Pool(numOfThreads)
+    result = threadPool.starmap_async(runSimulatorFunction, angles)
+    result.get()
