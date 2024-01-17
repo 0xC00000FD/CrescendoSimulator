@@ -2,10 +2,10 @@
 This ring shooting simulator models the trajectory of a ring shot with given initial conditions (initial velocity, angle) and models drag and the gravitational force.
 
 ## Files:
-- [Ring Class](https://github.com/0xC00000FD/CrescendoSimulator/blob/master/ring.py)
-- [Main simulator file](https://github.com/0xC00000FD/CrescendoSimulator/blob/master/simulator.py)
-- [Plotting tool for data verification](https://github.com/0xC00000FD/CrescendoSimulator/blob/master/plot.py)
-- [Empirically finding drag coefficient](https://github.com/0xC00000FD/CrescendoSimulator/blob/master/findDragCoeff.py)
+- [Ring Class](/src/ring.py)
+- [Main simulator file](/src/simulator.py)
+- [Plotting tool for data verification](/src/plot.py)
+- [Empirically finding drag coefficient](/src/findDragCoeff.py)
 
 ## ReadMe Contents:
 1. [How to install and run](#how-to-run)
