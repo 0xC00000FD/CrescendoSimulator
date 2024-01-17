@@ -55,7 +55,7 @@ For the ring, E is the vector (rho = outerDiameter / 2, phi = ringAngle) in pola
 
 Consider another pair of vectors, C and F, for any line that we want to detect a collision with. C is the starting point vector, and F describes the actual line.
 
-To get the collisin points for the two pairs of vectors, we can consider the following equation:
+To get the collision points for the two pairs of vectors, we can consider the following equation:
 
     A + E * g = C + F * h
 
@@ -82,7 +82,29 @@ We can tweak the conditions of the detection system to simulate different obstac
 The collision system gives different values depending on which wall was hit, and we will see why in the next section about simulation optimization.
 
 ## Simulator Optimization:
-WIP
+For the simulation, I went less with a mathematical approach to optimization and did more software-based optimizations.
+
+One of the first optimizations was splitting the task of simulating to multiple processes/instances (not threads) of the python interpreter. Thus, every process checks only a small sub-range of angles, for every distance between the declared min-distance and the given max-distance. (room for optimization here, some angles do not have solutions beyond/below a certain distance)
+
+The second optimization was that for a fixed angle and distance, decreasing the launch speed would result in a lower maximum trajectory height and distance, and increasing the speed would do the opposite. Thus, for values between 0 and a theoretical max speed (maximum speed of the wheels, in meters per second), using the different collision codes for each wall (lower wall, upper wall, or 0 for the ground) we can do a binary search type of operation to find the correct solutions for the problem. If it is to hit the ground or the lower wall, we know the speed has to be higher, and if it is to hit the upper infinite wall we know the speed must be lower.
+
+The simulator also accounts for which edge of the opening is closer to the ring when it a solution is found, and always goes increases/decreases the speed in the direction of the center of the opening.
+
+Being closer to the center of the opening is preffered as it gives the most room for error while in a match. Thus, every solution also includes the distance from the collision point (the intersection of the ring and the opening) to the center of the opening as a "rating function" for how good the solution is. This will be useful when culling down the solutions to just one solution per every distance checked, so that we can create a mathematical equation for angle/distance and speed/distance by interpolating the data points later. This will allow for faster on-the-go calculation of the values in the code, and make the robot code more efficient.
+
+WIP: merging the values into one file (every process has its own file to avoid locks on the file, which would make the processes not parallel but sequential) and culling the values.
 
 ## How to empirically find the drag coefficient
-WIP
+To empirically find the drag coefficient, you can use the provided file by giving real-world values for the angle at which the ring is shot, the velocity of the ring as it exits the shooter and the distance that the ring traveled in the X coordinate (distance from robot center to the ring's landing location).
+
+For the angle, we can easily calculate that from encoder values of the motors that actuate the shooter, or in the case of fixed-angle shooters, simply the angle at which the shooter is mounted.
+
+For the exit velocity, it would be possible to calculate this using a slow-motion camera and a ruler. Take the distance traveled in the span of 2-10 frames and the time between those frames and you have the exit velocity (if distance is measured in X or Y axis you have to do a little bit of trigonometry to figure out the actual velocity of the ring).
+
+A camera could also record the impact of the ring and the ground and figure out the precise location of the landing point (a tolerance of + or - 20 cm is probably good enough).
+
+These values can be input into the file and the file will run the simulations to figure out the coefficient and it will output it to the terminal as a double. You can change the tolerance of the algorithm for more accurate results, but it may severely slow down the process of finding the values.
+
+The same optimizations that we used for the actual simulator are applied here. For a given angle and speed, a bigger coefficient of drag would make the ring land closer to the robot and a smaller one would make the ring land farther. Thus we can once again use a binary search method to find the value. The simulation is once again split into several processes each with their own sub-ranges of drag coefficients to test on.
+
+NOTE: To be tested with real rings. None of this has yet been tested with actual real-life rings and robots, this whole project is theoretical and nature and bugs/inconsistencies may arise from that. If you have anything to contribute to this, be sure to leave me a message over on Discord, my username is 0xC00000FD.
