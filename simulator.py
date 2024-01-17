@@ -77,7 +77,7 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
                         
 if __name__ == '__main__':
     angles = []
-    numOfThreads = 15
+    numOfThreads = 10
     
     minAngle = 20
     maxAngle = 65
