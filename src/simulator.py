@@ -4,6 +4,7 @@ from numpy import arange
 import vector
 import matplotlib.pyplot as plt
 from multiprocessing import Pool, set_start_method
+import os
 
 def closest(lst, K):
     return lst[min(range(len(lst)), key = lambda i: abs(lst[i]-K))]
@@ -17,7 +18,7 @@ class Solution:
         self.position = position
         
     def getAsString(self):
-        return str.format("{},{},{},({}, {}),{}\n", self.distance, self.speed, self.angle, self.position.x, self.position.y, self.rating)
+        return str.format("{},{},{},{}\n", self.distance, self.rating, self.angle, self.speed)
     
 def runSimulatorFunction(angleStart, angleEnd, threadID):
     minDistance = 1.2 # m
@@ -89,5 +90,29 @@ if __name__ == '__main__':
         angles.append((startAngle, endAngle, thread))
 
     threadPool = Pool(numOfThreads)
-    result = threadPool.starmap_async(runSimulatorFunction, angles)
-    result.get()
+    
+    try:
+        threadPool.starmap(runSimulatorFunction, angles)
+    except KeyboardInterrupt:
+        threadPool.terminate()
+    
+    allSolutions = []
+    for file in os.listdir():
+        if file.startswith("solutionFile"):
+            f = open(file)
+            
+            for line in f.readlines():
+                allSolutions.append(tuple(float(x) for x in line.split(",")))
+                
+            os.remove(file)
+    
+    allSolutions.sort(reverse = True)
+    
+    allSolutionsCulled = {solution[0]: solution for solution in allSolutions}
+    
+    allSolutions = list(allSolutionsCulled.values())
+    
+    with open("./finalSolutions.txt", "w") as solutionFile:
+        for solution in allSolutions:
+            solutionString = str.format("{} {} {} {}\n", solution[0], solution[1], solution[2], solution[3])
+            solutionFile.write(solutionString)

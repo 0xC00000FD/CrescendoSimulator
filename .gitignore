@@ -2,3 +2,4 @@
 __pycache__/*
 !requirements.txt
 .DS_Store
+*.pyc
