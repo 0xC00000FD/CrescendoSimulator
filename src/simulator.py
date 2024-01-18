@@ -1,10 +1,11 @@
 from ring import Ring
 from math import radians, pi
 from numpy import arange
+from multiprocessing import Pool
+import scipy.interpolate as scp
+import os
 import vector
 import matplotlib.pyplot as plt
-from multiprocessing import Pool, set_start_method
-import os
 
 def closest(lst, K):
     return lst[min(range(len(lst)), key = lambda i: abs(lst[i]-K))]
@@ -111,8 +112,21 @@ if __name__ == '__main__':
     allSolutionsCulled = {solution[0]: solution for solution in allSolutions}
     
     allSolutions = list(allSolutionsCulled.values())
+    allSolutions.sort()
+    
+    xAxisMeters = list(solution[0] for solution in allSolutions)
+    yAxisRads = list(solution[3] for solution in allSolutions)
+    yAxisMetersPerSec = list(solution[2] for solution in allSolutions)
+    
+    print(xAxisMeters, yAxisRads, yAxisMetersPerSec)
+    
+    splineAnglePerDistance: scp.BSpline = scp.make_interp_spline(xAxisMeters, yAxisRads)
+    splineSpeedPerDistance: scp.BSpline = scp.make_interp_spline(xAxisMeters, yAxisMetersPerSec)
     
     with open("./finalSolutions.txt", "w") as solutionFile:
+        solutionFile.write(str.format("Interpolated distance to angle equation coefficients: {}\n", splineAnglePerDistance.c))
+        solutionFile.write(str.format("Interpolated distance to speed equation coefficients: {}\n\n", splineSpeedPerDistance.c))
+        
         for solution in allSolutions:
             solutionString = str.format("{} {} {} {}\n", solution[0], solution[1], solution[2], solution[3])
             solutionFile.write(solutionString)
