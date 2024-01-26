@@ -19,7 +19,7 @@ class Solution:
         self.position = position
         
     def getAsString(self):
-        return str.format("{},{},{},{}\n", self.distance, self.rating, self.angle, self.speed)
+        return str.format("{:.3f},{:.3f},{:.3f},{:.3f}\n", self.distance, self.rating, self.angle, self.speed)
     
 def runSimulatorFunction(angleStart, angleEnd, threadID):
     minDistance = 1.2 # m
@@ -37,6 +37,9 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
     outerDiameterMeters = 0.3556
     thicknessMeters = 0.0508
 
+    maxIterations = 20
+    tolerance = 0.5
+
     checkCollisions = 0
     
     ring1 = Ring(dragCoefficient, mass, shooterHeightMeters, shooterLengthMeters, innerDiameterMeters, outerDiameterMeters, thicknessMeters, threadID)
@@ -48,8 +51,9 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
         for angle in arange(angleStart, angleEnd, - 2 / distance):
             st = 1
             dr = theoreticalMaxSpeed
+            n = 0
             
-            while st <= dr:
+            while n <= maxIterations and abs(st-dr)/2 >= tolerance:
                 speed = (st + dr) / 2
                 
                 ring1.shoot(radians(angle), speed, distance)
@@ -62,20 +66,21 @@ def runSimulatorFunction(angleStart, angleEnd, threadID):
                     if checkCollisions != 0:
                         break
                 
+                n += 1
                 print(ring1.getPosition(), angle, distance, speed, checkCollisions, flush=True)
                 if checkCollisions == 1 or ring1.getPosition().y < 0:
-                    st = speed + 0.5
+                    st = speed
                 elif checkCollisions == 2:
-                    dr = speed - 0.05
+                    dr = speed
                 elif checkCollisions < 0:
                     solution = Solution(distance, speed, radians(angle), ring1.getPosition(), ring1.getClosestDistance())
                     f.write(solution.getAsString())
                     f.flush()
                     
                     if checkCollisions == -1:
-                        st = speed + 0.5
+                        st = speed
                     elif checkCollisions == -2:
-                        dr = speed - 0.05
+                        dr = speed
                         
 if __name__ == '__main__':
     angles = []
@@ -120,13 +125,13 @@ if __name__ == '__main__':
     
     print(xAxisMeters, yAxisRads, yAxisMetersPerSec)
     
-    splineAnglePerDistance: scp.BSpline = scp.make_interp_spline(xAxisMeters, yAxisRads)
-    splineSpeedPerDistance: scp.BSpline = scp.make_interp_spline(xAxisMeters, yAxisMetersPerSec)
+    splineAnglePerDistance = scp.KroghInterpolator(xAxisMeters, yAxisRads)
+    splineSpeedPerDistance = scp.KroghInterpolator(xAxisMeters, yAxisMetersPerSec)
     
     with open("./finalSolutions.txt", "w") as solutionFile:
         solutionFile.write(str.format("Interpolated distance to angle equation coefficients: {}\n", splineAnglePerDistance.c))
         solutionFile.write(str.format("Interpolated distance to speed equation coefficients: {}\n\n", splineSpeedPerDistance.c))
         
         for solution in allSolutions:
-            solutionString = str.format("{} {} {} {}\n", solution[0], solution[1], solution[2], solution[3])
+            solutionString = str.format("{:.3f} {:.3f} {:.3f} {:.3f}\n", solution[0], solution[1], solution[2], solution[3])
             solutionFile.write(solutionString)

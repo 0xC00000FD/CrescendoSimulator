@@ -11,7 +11,7 @@ This ring shooting simulator models the trajectory of a ring shot with given ini
 1. [How to install and run](#how-to-run)
 2. [Ring class](#ring-class)
 3. [Simulator optimization](#simulator-optimization)
-4. [How to empirically find drag coefficient](#how-to-empirically-find-drag-coefficient)
+4. [How to empirically find drag coefficient](#how-to-empirically-find-the-drag-coefficient)
 
 
 ## How to install and run:
@@ -107,4 +107,4 @@ These values can be input into the file and the file will run the simulations to
 
 The same optimizations that we used for the actual simulator are applied here. For a given angle and speed, a bigger coefficient of drag would make the ring land closer to the robot and a smaller one would make the ring land farther. Thus we can once again use a binary search method to find the value. The simulation is once again split into several processes each with their own sub-ranges of drag coefficients to test on.
 
-NOTE: To be tested with real rings. None of this has yet been tested with actual real-life rings and robots, this whole project is theoretical and nature and bugs/inconsistencies may arise from that. If you have anything to contribute to this, be sure to leave me a message over on Discord, my username is 0xC00000FD.
+NOTE: To be tested with real rings. None of this has yet been tested with actual real-life rings and robots, this whole project is theoretical in nature and bugs/inconsistencies may arise from that. If you have anything to contribute to this, be sure to leave me a message over on Discord, my username is 0xC00000FD.

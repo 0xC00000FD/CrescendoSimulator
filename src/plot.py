@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-f = open("finalSolutions.txt", "r")
+f = open("../finalSolutions.txt", "r")
 
 solutionsArray = []
 distances = []
